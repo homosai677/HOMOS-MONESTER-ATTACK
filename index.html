@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>HOMOS Monster Attack</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: black;
+      font-family: sans-serif;
+      color: white;
+      overflow: hidden;
+    }
+    #startScreen, #gameOverScreen, #winScreen {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+    #startBtn, #restartBtn, #restartBtn2 {
+      padding: 15px 30px;
+      font-size: 20px;
+      background: crimson;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    #monster {
+      width: 140px;
+      height: 140px;
+      position: absolute;
+      cursor: pointer;
+      display: none;
+    }
+    #monster img {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 25px red);
+    }
+    #score, #highScore, #timer, #lives {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-size: 20px;
+    }
+    #highScore { top: 40px; }
+    #timer { top: 70px; }
+    #lives { top: 100px; }
+    .flash {
+      animation: flashAnim 0.3s ease-in-out;
+    }
+    @keyframes flashAnim {
+      0% { background-color: red; }
+      100% { background-color: black; }
+    }
+    .blood {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: url('https://i.postimg.cc/TPJbFV1H/IMG-20250213-093138-546-removebg-preview.png') center center no-repeat;
+      background-size: cover;
+      z-index: 9;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div id="startScreen">
+  <h1>HOMOS Monster Attack</h1>
+  <button id="startBtn">ابدأ اللعب</button>
+</div>
+
+<div id="gameOverScreen" style="display:none">
+  <h1>خسرت!</h1>
+  <button id="restartBtn">عيد يسطا</button>
+  <button onclick="shareScore()">شارك نتيجتي</button>
+</div>
+
+<div id="winScreen" style="display:none">
+  <h1>كسبت يا صاحبي!</h1>
+  <button id="restartBtn2"> عيد بقا</button>
+  <button onclick="shareScore()">شارك نتيجتي</button>
+</div>
+
+<div class="blood" id="bloodEffect"></div>
+
+<div id="score">السكور: 0</div>
+<div id="highScore">أعلى سكور: 0</div>
+<div id="timer">الوقت: 10</div>
+<div id="lives">الفرص: ❤️❤️❤️</div>
+<div id="monster"><img src="https://i.postimg.cc/TPJbFV1H/IMG-20250213-093138-546-removebg-preview.png" alt="وحش"></div>
+<audio id="scarySound" src="https://www.fesliyanstudios.com/play-mp3/6966" preload="auto"></audio>
+<audio id="bgMusic" src="https://www.fesliyanstudios.com/play-mp3/6745" preload="auto" loop></audio>
+
+<script>
+  const monster = document.getElementById("monster");
+  const scoreText = document.getElementById("score");
+  const highScoreText = document.getElementById("highScore");
+  const timerText = document.getElementById("timer");
+  const scarySound = document.getElementById("scarySound");
+  const bgMusic = document.getElementById("bgMusic");
+  const bloodEffect = document.getElementById("bloodEffect");
+  const startScreen = document.getElementById("startScreen");
+  const gameOverScreen = document.getElementById("gameOverScreen");
+  const winScreen = document.getElementById("winScreen");
+  const livesText = document.getElementById("lives");
+
+  let score = 0;
+  let highScore = localStorage.getItem("highScore") || 0;
+  let gameOver = false;
+  let timer = 10;
+  let lives = 3;
+  let timerInterval;
+  let startProtection = false;
+
+  function moveMonster() {
+    const x = Math.random() * (window.innerWidth - 140);
+    const y = Math.random() * (window.innerHeight - 140);
+    monster.style.left = x + "px";
+    monster.style.top = y + "px";
+  }
+
+  function startTimer() {
+    timer = 10;
+    timerText.textContent = "الوقت: " + timer;
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      if (gameOver) return;
+      timer--;
+      timerText.textContent = "الوقت: " + timer;
+      if (timer <= 0) {
+        loseLife();
+      }
+    }, 660);
+  }
+
+  function updateScore() {
+    score++;
+    scoreText.textContent = "السكور: " + score;
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem("highScore", highScore);
+      highScoreText.textContent = "أعلى سكور: " + highScore;
+    }
+    if (score >= 1000) {
+      endGame("win");
+    }
+  }
+
+  function loseLife() {
+    lives--;
+    updateLivesDisplay();
+    if (lives <= 0) {
+      endGame("gameover");
+    } else {
+      startTimer();
+      moveMonster();
+    }
+  }
+
+  function updateLivesDisplay() {
+    const heart = '❤️';
+    livesText.textContent = `الفرص: ${heart.repeat(lives)}`;
+  }
+
+  function endGame(type) {
+    gameOver = true;
+    clearInterval(timerInterval);
+    monster.style.display = "none";
+    scarySound.play();
+    document.body.classList.add("flash");
+    bloodEffect.style.display = "block";
+    setTimeout(() => {
+      document.body.classList.remove("flash");
+    }, 310);
+    if (type === "gameover") gameOverScreen.style.display = "flex";
+    else if (type === "win") winScreen.style.display = "flex";
+  }
+
+  function shareScore() {
+    const message = `أنا جبت سكور ${score} في لعبة HOMOS Monster Attack! جربها يا صاحبي!`;
+    const url = encodeURIComponent('https://homosaiconpanion.github.io/HOMOS-Monster-Attack/');
+    const fullText = `${message} ${url}`;
+    if (navigator.share) {
+      navigator.share({
+        title: 'HOMOS Monster Attack',
+        text: message,
+        url: url
+      }).catch((error) => console.error('مشاركة فشلت:', error));
+    } else {
+      let whatsapp = `https://wa.me/?text=${encodeURIComponent(fullText)}`;
+      window.open(whatsapp, '_blank');
+    }
+  }
+
+  monster.addEventListener("click", (e) => {
+    if (gameOver) return;
+    e.stopPropagation();
+    updateScore();
+    moveMonster();
+    startTimer();
+  });
+
+  document.addEventListener("click", (e) => {
+    if (gameOver || startProtection) return;
+    if (!e.target.closest("#monster")) {
+      loseLife();
+    }
+  });
+
+  document.getElementById("startBtn").onclick = () => {
+    startScreen.style.display = "none";
+    monster.style.display = "block";
+    moveMonster();
+    bgMusic.play();
+    startTimer();
+    gameOver = false;
+    startProtection = true;
+    lives = 3;
+    updateLivesDisplay();
+    setTimeout(() => { startProtection = false; }, 1000);
+    setInterval(() => {
+      if (!gameOver) moveMonster();
+    }, 760);
+  };
+
+  document.getElementById("restartBtn").onclick = restartGame;
+  document.getElementById("restartBtn2").onclick = restartGame;
+
+  function restartGame() {
+    score = 0;
+    gameOver = false;
+    lives = 3;
+    scoreText.textContent = "السكور: 0";
+    gameOverScreen.style.display = "none";
+    winScreen.style.display = "none";
+    monster.style.display = "block";
+    bloodEffect.style.display = "none";
+    moveMonster();
+    updateLivesDisplay();
+    startTimer();
+  }
+
+  highScoreText.textContent = "أعلى سكور: " + highScore;
+  updateLivesDisplay();
+</script>
+</body>
+</html>
