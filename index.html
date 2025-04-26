@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOMOS Wallet</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>محفظة HOMOS</h1>
+        <button onclick="goBack()" class="back-btn">رجوع</button>
+    </div>
+
+    <div id="user-info" class="section">
+        <p>أهلاً بيك! رصيدك الحالي: <span id="balance">0</span> جنيه</p>
+    </div>
+
+    <div id="actions" class="section">
+        <button onclick="showSection('deposit')">إيداع</button>
+        <button onclick="showSection('withdraw')">سحب</button>
+        <button onclick="showSection('transfer')">تحويل رصيد</button>
+    </div>
+
+    <div id="deposit" class="section hidden">
+        <h2>إيداع</h2>
+        <p>خد بالك، في مصاريف خدمة ٢ جنيه على الإيداع.</p>
+        <p>حول على الرقم: 01012265953</p>
+        <button onclick="copyPhoneNumber()">انسخ الرقم</button>
+        <input type="number" id="deposit-amount" placeholder="اكتب المبلغ اللي حولته">
+        <input type="text" id="deposit-sender" placeholder="اكتب رقمك اللي حولت منه">
+        <input type="file" id="deposit-proof">
+        <button onclick="confirmDeposit()">تأكيد الإيداع</button>
+    </div>
+
+    <div id="withdraw" class="section hidden">
+        <h2>سحب</h2>
+        <p>هيتم خصم ١.٥٪ من المبلغ، وأقل خصم ٣ جنيه.</p>
+        <input type="number" id="withdraw-amount" placeholder="اكتب المبلغ اللي عايز تسحبه">
+        <input type="text" id="withdraw-number" placeholder="اكتب رقم الموبايل اللي هتحول عليه">
+        <button onclick="confirmWithdraw()">تأكيد السحب</button>
+    </div>
+
+    <div id="transfer" class="section hidden">
+        <h2>تحويل رصيد</h2>
+        <input type="email" id="transfer-email" placeholder="ايميل اللي هتحوله">
+        <input type="number" id="transfer-amount" placeholder="المبلغ اللي هتحوله">
+        <button onclick="confirmTransfer()">تأكيد التحويل</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
